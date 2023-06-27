@@ -46,3 +46,79 @@ struct Timer {
     }
 };
 
+constexpr double time_limit = 1.95; // TODO
+
+struct Input {
+    // TODO
+
+    void input() {
+        // TODO
+    }
+
+    void input(const string& filename) {
+        ifstream in(filename);
+        // TODO
+    }
+};
+
+struct Solver {
+
+    Solver(const Input& input) {
+        // TODO
+    }
+
+    void solve() {
+        // TODO
+    }
+
+    void print() {
+        // TODO
+    }
+
+    ll score() {
+        // TODO
+    }
+};
+
+void multi_test(int cases) {
+    cerr << "cases: " << cases << endl;
+
+    long long sum_scores = 0.0;
+    for (int seed = 0; seed < cases; ++seed) {
+        string filename = "in/";
+        filename += '0' + seed / 1000;
+        filename += '0' + (seed / 100) % 10;
+        filename += '0' + (seed / 10) % 10;
+        filename += '0' + seed % 10;
+        filename += ".txt";
+
+        Timer timer;
+        timer.begin();
+ 
+        Input input;
+        input.input(filename);
+ 
+        Solver solver(input);
+        solver.solve();
+
+        cerr << filename << " " << solver.score() << " " << timer.stopwatch() << " sec" << endl;
+        sum_scores += solver.score();
+    }
+    cerr << "Average Score: " << sum_scores / cases << endl;
+}
+
+int main() {
+    Input input;
+    input.input();
+
+    Solver solver(input);
+    solver.solve();
+    solver.print();
+
+// #ifndef ONLINE_JUDGE
+//     int cases = 10;
+//     multi_test(cases);
+// #endif
+
+    return 0;
+}
