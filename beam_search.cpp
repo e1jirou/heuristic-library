@@ -26,11 +26,11 @@ struct State {
         // TODO
     }
 
-    void forward(Action a) {
+    void move_forward(Action a) {
         // TODO
     }
 
-    void backward(Action a) {
+    void move_backward(Action a) {
         // TODO
     }
 
@@ -49,9 +49,9 @@ struct Node {
     vector<pair<Action,weak_ptr<Node>>> children;
 
     Node(shared_ptr<Node> parent, Action parent_action, State& state): parent(parent), parent_action(parent_action) {
-        state.forward(parent_action);
+        state.move_forward(parent_action);
         evaluation = state.evaluate();
-        state.backward(parent_action);
+        state.move_backward(parent_action);
 
         depth = (parent == nullptr) ? 0 : (parent->depth + 1);
         expanded = false;
@@ -124,7 +124,7 @@ vector<Action> beam_search(const Input& input) {
                 }
                 if (child) {
                     // move to the child
-                    state.forward(node->children[node->child_index++].first);
+                    state.move_forward(node->children[node->child_index++].first);
                     node = child;
                     continue;
                 }
@@ -135,7 +135,7 @@ vector<Action> beam_search(const Input& input) {
                     break;
                 } else {
                     // move to the parent
-                    state.backward(node->parent_action);
+                    state.move_backward(node->parent_action);
                     node = node->parent;
                 }
             }
