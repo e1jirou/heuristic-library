@@ -117,14 +117,15 @@ vector<Action> beam_search(const Input& input) {
                     next_nodes.push(shared_ptr<Node>(new Node(node, action, state)));
                 }
             } else if (node->depth < turn) {
-                while (node->child_index < (int)node->children.size() && node->children[node->child_index].second.expired()) {
+                shared_ptr<Node> child = nullptr;
+                while (node->child_index < (int)node->children.size() && !(child = node->children[node->child_index].second.lock())) {
                     // erase the deleted child
                     node->children.erase(node->children.begin() + node->child_index);
                 }
-                if (node->child_index < (int)node->children.size()) {
+                if (child) {
                     // move to the child
-                    state.forward(node->children[node->child_index].first);
-                    node = node->children[node->child_index++].second.lock();
+                    state.forward(node->children[node->child_index++].first);
+                    node = child;
                     continue;
                 }
             } else {
