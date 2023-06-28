@@ -62,9 +62,11 @@ struct Input {
 };
 
 struct Solver {
+    Timer timer;
+    Input input;
 
-    Solver(const Input& input) {
-        // TODO
+    Solver(const Input& input): input(input) {
+        timer.begin();
     }
 
     void solve() {
