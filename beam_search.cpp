@@ -141,4 +141,12 @@ vector<Action> beam_search(const Input& input) {
         }
         temp_nodes = next_nodes;
     }
+    assert(!temp_nodes.empty());
+    while ((int)temp_nodes.size() > 1) {
+        temp_nodes.pop();
+    }
+    shared_ptr<Node> node = temp_nodes.top();
+    vector<Action> path;
+    node->get_path(path);
+    return path;
 }
