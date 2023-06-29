@@ -84,7 +84,7 @@ vector<Action> beam_search(const Input& input) {
     State state(input);
 
     shared_ptr<Node> root(new Node(nullptr, 0, state));
-    priority_queue<shared_ptr<Node>> temp_nodes; // If you want to ensure diversity, it might be better to use multiset<priority_queue<shared_ptr<Node>>>
+    priority_queue<shared_ptr<Node>> temp_nodes;
     temp_nodes.push(root);
 
     for (int turn = 0; turn < max_turn; ++turn) {
