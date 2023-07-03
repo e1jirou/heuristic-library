@@ -63,7 +63,7 @@ struct Input {
 
 struct Solver {
     Timer timer;
-    Input input;
+    const Input input;
 
     Solver(const Input& input): input(input) {
         timer.begin();
