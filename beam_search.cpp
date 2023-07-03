@@ -49,11 +49,15 @@ struct Node {
     vector<pair<Action,weak_ptr<Node>>> children;
 
     Node(shared_ptr<Node> parent, Action parent_action, State& state): parent(parent), parent_action(parent_action) {
-        state.move_forward(parent_action);
-        evaluation = state.evaluate();
-        state.move_backward(parent_action);
-
-        depth = (parent == nullptr) ? 0 : (parent->depth + 1);
+        if (parent == nullptr) {
+            evaluation = 0;
+            depth = 0;
+        } else {
+            state.move_forward(parent_action);
+            evaluation = state.evaluate();
+            state.move_backward(parent_action);
+            depth = parent->depth + 1;
+        }
         expanded = false;
         child_index = 0;
     }
