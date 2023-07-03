@@ -86,14 +86,14 @@ constexpr int max_turn = 1000; // TODO
 
 vector<Action> beam_search(const Input& input) {
     State state(input);
-
+ 
     shared_ptr<Node> root(new Node(nullptr, 0, state));
     priority_queue<shared_ptr<Node>> temp_nodes;
     temp_nodes.push(root);
-
+ 
     for (int turn = 0; turn < max_turn; ++turn) {
         priority_queue<shared_ptr<Node>> next_nodes;
-
+ 
         // Depth First Search
         shared_ptr<Node> node = root;
         while (true) {
@@ -118,8 +118,11 @@ vector<Action> beam_search(const Input& input) {
                         }
                     }
                     // push the new node
-                    next_nodes.push(shared_ptr<Node>(new Node(node, action, state)));
+                    shared_ptr<Node> child = shared_ptr<Node>(new Node(node, action, state));
+                    node->add_child(action, child);
+                    next_nodes.push(child);
                 }
+                continue;
             } else if (node->depth < turn) {
                 shared_ptr<Node> child = nullptr;
                 while (node->child_index < (int)node->children.size() && !(child = node->children[node->child_index].second.lock())) {
@@ -132,16 +135,15 @@ vector<Action> beam_search(const Input& input) {
                     node = child;
                     continue;
                 }
+            }
+            node->child_index = 0;
+            if (node->parent == nullptr) {
+                // root
+                break;
             } else {
-                node->child_index = 0;
-                if (node->parent == nullptr) {
-                    // root
-                    break;
-                } else {
-                    // move to the parent
-                    state.move_backward(node->parent_action);
-                    node = node->parent;
-                }
+                // move to the parent
+                state.move_backward(node->parent_action);
+                node = node->parent;
             }
         }
         temp_nodes = next_nodes;
