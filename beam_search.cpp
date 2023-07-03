@@ -40,8 +40,8 @@ struct State {
 };
 
 struct Node {
-    shared_ptr<Node> parent;
-    Action parent_action;
+    const shared_ptr<Node> parent;
+    const Action parent_action;
     ll evaluation;
     int depth;
     bool expanded;
