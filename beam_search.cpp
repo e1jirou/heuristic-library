@@ -9,9 +9,9 @@ struct Input {
     // TODO
 };
 
-using Action = int;
-using Evaluation = ll;
-using Hash = ull;
+using Action = int; // TODO
+using Evaluation = ll; // TODO
+using Hash = ull; // TODO
 
 struct State {
     int depth = 0;
