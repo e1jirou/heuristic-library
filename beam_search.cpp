@@ -102,25 +102,26 @@ void remove_node(vector<Node>& nodes, stack<int>& garbage, int v) {
     }
 }
 
-struct Candidate {
-    Action action;
-    int parent;
-    Evaluation evaluation;
-    Hash hash;
-
-    Candidate(Action action, int parent, Evaluation evaluation, Hash hash) :
-        action(action),
-        parent(parent),
-        evaluation(evaluation),
-        hash(hash) {}
-};
-
 constexpr size_t beam_width = 100; // TODO
 constexpr int max_turn = 1000; // TODO
 constexpr size_t branches = 4; // TODO
 constexpr size_t nodes_size = 10000; // TODO
 
 vector<Action> beam_search(const Input& input) {
+
+    struct Candidate {
+        Action action;
+        int parent;
+        Evaluation evaluation;
+        Hash hash;
+
+        Candidate(Action action, int parent, Evaluation evaluation, Hash hash) :
+            action(action),
+            parent(parent),
+            evaluation(evaluation),
+            hash(hash) {}
+    };
+
     State state(input);
 
     vector<Node> nodes;
