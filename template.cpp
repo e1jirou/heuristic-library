@@ -88,6 +88,10 @@ void multi_test(int cases) {
     cerr << "cases: " << cases << endl;
 
     ll sum_scores = 0.0;
+    double sum_time = 0.0;
+    double max_time = 0.0;
+    int max_time_seed = -1;
+
     for (int seed = 0; seed < cases; ++seed) {
         string filename = "in/";
         filename += '0' + seed / 1000;
@@ -104,8 +108,16 @@ void multi_test(int cases) {
 
         cerr << filename << " " << solver.score() << " " << solver.timer.stopwatch() << " sec" << endl;
         sum_scores += solver.score();
+
+        sum_time += solver.timer.stopwatch();
+        if (solver.timer.stopwatch() > max_time) {
+            max_time = solver.timer.stopwatch();
+            max_time_seed = seed;
+        }
     }
-    cerr << "Average Score: " << sum_scores / cases << endl;
+    cerr << "Average Score: " << sum_scores / max(1, cases) << endl;
+    cerr << "Max Time: " << max_time << " sec (seed = " << max_time_seed << ")" << endl;
+    cerr << "Average Time: " << sum_time / max(1, cases) << " sec" << endl;
 }
 
 int main() {
