@@ -87,7 +87,7 @@ struct Solver {
 void multi_test(int cases) {
     cerr << "cases: " << cases << endl;
 
-    long long sum_scores = 0.0;
+    ll sum_scores = 0.0;
     for (int seed = 0; seed < cases; ++seed) {
         string filename = "in/";
         filename += '0' + seed / 1000;
