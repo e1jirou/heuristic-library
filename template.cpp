@@ -87,7 +87,7 @@ struct Solver {
 void multi_test(int cases) {
     cerr << "cases: " << cases << endl;
 
-    ll sum_scores = 0.0;
+    ll sum_scores = 0;
     double sum_time = 0.0;
     double max_time = 0.0;
     int max_time_seed = -1;
