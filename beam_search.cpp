@@ -210,11 +210,10 @@ vector<Action> beam_search(const Input& input) {
         }
         // make new nodes
         for (const Candidate& candidate : candidates) {
-            if (hashes.count(candidate.hash)) {
+            if (!hashes.insert(candidate.hash).second) {
                 // overlap
                 continue;
             }
-            hashes.insert(candidate.hash);
             int left = left_memo[candidate.parent];
             int v;
             if (garbage.empty()) {
