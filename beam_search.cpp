@@ -148,6 +148,8 @@ vector<Action> beam_search(const Input& input) {
     vector<int> left_memo_using;
     left_memo_using.reserve(beam_width);
 
+    unordered_set<Hash> hashes;
+
     int root = 0;
 
     for (int turn = 0; turn < max_turn; ++turn) {
@@ -205,7 +207,6 @@ vector<Action> beam_search(const Input& input) {
             return path;
         }
         // make new nodes
-        set<Hash> hashes;
         for (const Candidate& candidate : candidates) {
             if (hashes.count(candidate.hash)) {
                 // overlap
@@ -235,6 +236,8 @@ vector<Action> beam_search(const Input& input) {
                 break;
             }
         }
+        hashes.clear();
+
         for (int v : left_memo_using) {
             left_memo[v] = -1;
         }
