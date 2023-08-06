@@ -58,6 +58,7 @@ struct Input {
     void input(const string& filename) {
         ifstream in(filename);
         assert(in);
+
         // TODO
     }
 };
