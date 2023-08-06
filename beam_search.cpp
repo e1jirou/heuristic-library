@@ -83,6 +83,7 @@ struct Node {
 void remove_node(vector<Node>& nodes, stack<int>& garbage, int v) {
     while (true) {
         assert(nodes[v].child == -1);
+        assert(v);
 
         garbage.push(v);
         if (nodes[v].left != -1) {
