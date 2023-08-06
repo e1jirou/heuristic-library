@@ -95,9 +95,6 @@ void multi_test(int cases) {
         filename += '0' + (seed / 10) % 10;
         filename += '0' + seed % 10;
         filename += ".txt";
-
-        Timer timer;
-        timer.begin();
  
         Input input;
         input.input(filename);
@@ -105,7 +102,7 @@ void multi_test(int cases) {
         Solver solver(input);
         solver.solve();
 
-        cerr << filename << " " << solver.score() << " " << timer.stopwatch() << " sec" << endl;
+        cerr << filename << " " << solver.score() << " " << solver.timer.stopwatch() << " sec" << endl;
         sum_scores += solver.score();
     }
     cerr << "Average Score: " << sum_scores / cases << endl;
