@@ -211,6 +211,7 @@ vector<Action> beam_search(const Input& input) {
                 // overlap
                 continue;
             }
+            hashes.insert(candidate.hash);
             int left = left_memo[candidate.parent];
             int v;
             if (garbage.empty()) {
