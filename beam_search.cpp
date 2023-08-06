@@ -252,5 +252,5 @@ vector<Action> beam_search(const Input& input) {
         candidates.clear();
     }
     cerr << "ERROR: unreachable statement" << endl;
-    exit(-1);
+    std::exit(-1);
 }
