@@ -173,6 +173,7 @@ vector<Action> beam_search(const Input& input) {
                 vector<Action> path;
                 path.reserve(turn);
                 nodes[v].get_path(path, nodes);
+                // cerr << nodes.size() << endl;
                 return path;
             }
             // enumerate children
@@ -204,6 +205,7 @@ vector<Action> beam_search(const Input& input) {
             vector<Action> path = {candidates[0].action};
             path.reserve(turn);
             nodes[v].get_path(path, nodes);
+            // cerr << nodes.size() << endl;
             return path;
         }
         // make new nodes
