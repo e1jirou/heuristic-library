@@ -106,12 +106,14 @@ void multi_test(int cases) {
         Solver solver(input);
         solver.solve();
 
-        cerr << filename << " " << solver.score() << " " << solver.timer.stopwatch() << " sec" << endl;
+        double elapsed_time = solver.timer.stopwatch();
+
+        cerr << filename << " " << solver.score() << " " << elapsed_time << " sec" << endl;
         sum_scores += solver.score();
 
-        sum_time += solver.timer.stopwatch();
-        if (solver.timer.stopwatch() > max_time) {
-            max_time = solver.timer.stopwatch();
+        sum_time += elapsed_time;
+        if (elapsed_time > max_time) {
+            max_time = elapsed_time;
             max_time_seed = seed;
         }
     }
@@ -128,10 +130,10 @@ int main() {
     solver.solve();
     solver.print();
 
-// #ifndef ONLINE_JUDGE
-//     int cases = 10;
-//     multi_test(cases);
-// #endif
+#ifndef ONLINE_JUDGE
+    int cases = 0;
+    multi_test(cases);
+#endif
 
     return 0;
 }
