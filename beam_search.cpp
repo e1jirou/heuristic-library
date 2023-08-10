@@ -82,7 +82,6 @@ struct Node {
 
 void remove_node(vector<Node>& nodes, stack<int>& garbage, int v) {
     while (true) {
-        assert(v); // assert v is not the root
         assert(nodes[v].child == -1);
 
         garbage.push(v);
