@@ -148,7 +148,7 @@ vector<Action> beam_search(const Input& input) {
     vector<int> left_memo_using;
     left_memo_using.reserve(beam_width);
 
-    unordered_set<Hash> hashes;
+    unordered_set<Hash> hashes(4 * beam_width);
 
     int root = 0;
 
