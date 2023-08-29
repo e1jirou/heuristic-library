@@ -81,7 +81,7 @@ constexpr int max_turn = 1000; // TODO
 constexpr size_t branches = 4; // TODO
 constexpr size_t nodes_size = 10000; // TODO
 
-pair<int,vector<Action>> beam_search(const vector<pair<State,Node>>& roots) {
+pair<int,vector<Action>> beam_search_on_forest(const vector<pair<State,Node>>& roots) {
 
     struct Candidate {
         Action action;
