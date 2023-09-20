@@ -13,25 +13,25 @@ using namespace std;
 uniform_real_distribution<> uniform(0.0, 1.0);
 
 struct Timer {
-    chrono::system_clock::time_point start;
+    chrono::system_clock::time_point start_time_;
 
     void begin() {
-        start = chrono::system_clock::now();
+        start_time_ = chrono::system_clock::now();
     }
 
-    double stopwatch() {
-        chrono::system_clock::time_point end = chrono::system_clock::now();
-        double elapsed = chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-        elapsed *= 1e-9; // nanoseconds -> seconds
-        return elapsed;
+    double get_time() {
+        chrono::system_clock::time_point end_time = chrono::system_clock::now();
+        double elapsed_time = chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time_).count();
+        elapsed_time *= 1e-9; // nanoseconds -> seconds
+        return elapsed_time;
     }
 
     bool yet(double time_limit) {
-        return stopwatch() < time_limit;
+        return get_time() < time_limit;
     }
 
     double progress(double time_limit) {
-        return stopwatch() / time_limit;
+        return get_time() / time_limit;
     }
 
     bool annealing_scheduler(double profit, mt19937& engine, double time_limit, double t0, double t1) {
@@ -106,7 +106,7 @@ void multi_test(int cases) {
         Solver solver(input);
         solver.solve();
 
-        double elapsed_time = solver.timer.stopwatch();
+        double elapsed_time = solver.timer.get_time();
 
         cerr << filename << " " << solver.score() << " " << elapsed_time << " sec" << endl;
         sum_scores += solver.score();
