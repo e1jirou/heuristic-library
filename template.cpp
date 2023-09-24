@@ -18,22 +18,22 @@ class Timer {
             start_time_ = chrono::system_clock::now();
         }
 
-        double get_time() {
+        double get_time() const {
             chrono::system_clock::time_point end_time = chrono::system_clock::now();
             double elapsed_time = chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time_).count();
             elapsed_time *= 1e-9; // nanoseconds -> seconds
             return elapsed_time;
         }
 
-        bool yet(double time_limit) {
+        bool yet(double time_limit) const {
             return get_time() < time_limit;
         }
 
-        double progress(double time_limit) {
+        double progress(double time_limit) const {
             return get_time() / time_limit;
         }
 
-        bool annealing_scheduler(double profit, mt19937& engine, double time_limit, double t0, double t1) {
+        bool annealing_scheduler(double profit, mt19937& engine, double time_limit, double t0, double t1) const {
             assert(0.0 <= t1 && t1 <= t0);
             if (profit >= 0.0) {
                 return true;
@@ -46,7 +46,6 @@ class Timer {
 
     private:
         chrono::system_clock::time_point start_time_;
-
 };
 
 constexpr double time_limit = 1.95; // TODO
@@ -78,11 +77,11 @@ struct Solver {
         // TODO
     }
 
-    void print() {
+    void print() const {
         // TODO
     }
 
-    ll score() {
+    ll score() const {
         // TODO
     }
 };
@@ -134,6 +133,8 @@ int main() {
     solver.print();
 
 #ifndef ONLINE_JUDGE
+    cerr << "Score = " << solver.score() << ", " << solver.timer.get_time() << " sec" << endl;
+
     int cases = 0;
     multi_test(cases);
 #endif
