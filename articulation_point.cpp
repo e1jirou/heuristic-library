@@ -2,57 +2,55 @@
 
 using namespace std;
 
-// vector<int> edge3x3(int v) {
-//     vector<int> ret;
-//     if (v >= 3) {
-//         ret.push_back(v - 3);
-//     }
-//     if (v % 3 >= 1) {
-//         ret.push_back(v - 1);
-//     }
-//     if (v % 3 <= 1) {
-//         ret.push_back(v + 1);
-//     }
-//     if (v <= 5) {
-//         ret.push_back(v + 3);
-//     }
-//     return ret;
-// }
+template <int n>
+constexpr array<uint32_t, (1u << (n * n)) / 32> make_connection_judge() {
+    /*
+    This function aids in making a conservative assessment of
+    whether a vertex within a grid is an articulation point,
+    considering only the eight surrounding vertices.
 
-// bitset<512> make_connection_judge() {
-//     /*
-//     This function aids in making a conservative assessment of
-//     whether a vertex within a grid is an articulation point,
-//     considering only the eight surrounding vertices.
+    0 1 2
+    3 4 5
+    6 7 8
+    */
+    vector<vector<int>> edges(n * n);
+    for (int v = 0; v < n * n; ++v) {
+        if (v / n > 0) {
+            edges[v].push_back(v - n);
+        }
+        if (v % n > 0) {
+            edges[v].push_back(v - 1);
+        }
+        if (v % n < n - 1) {
+            edges[v].push_back(v + 1);
+        }
+        if (v / n < n - 1) {
+            edges[v].push_back(v + n);
+        }
+    }
+    array<uint32_t, (1u << (n * n)) / 32> is_connected;
+    fill(is_connected.begin(), is_connected.end(), 0);
 
-//     0 1 2
-//     3 4 5
-//     6 7 8
-//     */
-//     bitset<512> is_connected;
-//     for (uint32_t i = 1; i < 512; ++i) {
-//         const bitset<9> mask(i);
-//         // Depth First Search
-//         int root = countr_zero(i);
-//         bitset<9> visited(0);
-//         visited[root] = true;
-//         stack<int> todo;
-//         todo.push(root);
-//         while (!todo.empty()) {
-//             int u = todo.top();
-//             todo.pop();
-//             for (int v : edge3x3(u)) {
-//                 if (mask[v] && !visited[v]) {
-//                     visited[v] = true;
-//                     todo.push(v);
-//                 }
-//             }
-//         }
-//         is_connected[i] = (mask == visited);
-//     }
-//     return is_connected;
-// }
+    for (uint32_t mask = 1; mask < (1u << (n * n)); ++mask) {
+        // Depth First Search
+        int root = countr_zero(mask);
+        uint32_t visited = (1u << root);
+        uint32_t todo = (1u << root);
+        while (todo) {
+            int u = countr_zero(todo);
+            todo ^= (1u << u);
+            for (int v : edges[u]) {
+                if ((mask & (1u << v)) && (visited & (1u << v)) == 0) {
+                    visited |= (1u << v);
+                    todo |= (1u << v);
+                }
+            }
+        }
+        if (mask == visited) {
+            is_connected[mask / 32] |= (1u << (mask % 32));
+        }
+    }
+    return is_connected;
+}
 
-// const bitset<512> is_connected = make_connection_judge();
-
-const bitset<512> is_connected("11111111110111011111101111010001110011111100110110001011000000011111111111011101100000001101000111001111110011010000000000000001111111110000000010000000000000000000000000000000000000000000000011111111110111011000000011010001000000000000000000000000000000011111111111011101100000000000000011001111110011011000101100000001111111111101110100000000000000001100111111001101000000000000000111111111000000001000000000000000110011110000000010001011000000011111111111011101100000001101000111001111110011011000101111011110");
+constexpr array<uint32_t, (1u << (3 * 3)) / 32> is_connected = make_connection_judge<3>();
