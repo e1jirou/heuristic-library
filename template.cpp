@@ -10,7 +10,82 @@ using namespace std;
 #define ll long long int
 #define ull unsigned long long int
 
-uniform_real_distribution<> uniform(0.0, 1.0);
+class Xorshift {
+    public:
+        Xorshift(uint32_t seed): x(seed) {
+            assert(seed);
+        }
+
+        uint32_t randrange(uint32_t end) {
+            next();
+            return x % end;
+        }
+
+        uint32_t randrange(uint32_t begin, uint32_t end) {
+            next();
+            return begin + x % (end - begin);
+        }
+
+        double uniform() {
+            next();
+            return static_cast<double>(x) / static_cast<double>(UINT32_MAX);
+        }
+
+    private:
+        uint32_t next() {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+        }
+
+        uint32_t x;
+};
+
+class IndexSet {
+    public:
+        IndexSet(int n) : n_(n), positions_(n, -1) {}
+
+        void add(int x) {
+            assert(0 <= x && x < n_);
+            assert(!contains(x));
+            positions_[x] = data_.size();
+            data_.push_back(x);
+        }
+
+        void remove(int x) {
+            assert(0 <= x && x < n_);
+            assert(contains(x));
+            int pos = positions_[x];
+            int y = data_.back();
+            data_[pos] = y;
+            data_.pop_back();
+            positions_[y] = pos;
+            positions_[x] = -1;
+        }
+
+        bool contains(int x) const {
+            assert(0 <= x && x < n_);
+            return positions_[x] != -1;
+        }
+
+        int choice(Xorshift& engine) const {
+            assert(!data_.empty());
+            return data_[engine.randrange(data_.size())];
+        }
+
+        vector<int> all_data() const {
+            return data_;
+        }
+
+        int size() const {
+            return data_.size();
+        }
+
+    private:
+        int n_;
+        vector<int> data_;
+        vector<int> positions_;
+};
 
 class Timer {
     public:
@@ -33,14 +108,14 @@ class Timer {
             return get_time() / time_limit;
         }
 
-        bool annealing_scheduler(double profit, mt19937& engine, double time_limit, double t0, double t1) const {
+        bool annealing_scheduler(double profit, Xorshift& engine, double time_limit, double t0, double t1) const {
             assert(0.0 <= t1 && t1 <= t0);
             if (profit >= 0.0) {
                 return true;
             } else {
                 double ratio = progress(time_limit);
                 double t = pow(t0, 1.0 - ratio) * pow(t1, ratio);
-                return uniform(engine) < pow(2.0, profit/t);
+                return engine.uniform() < pow(2.0, profit/t);
             }
         }
 
