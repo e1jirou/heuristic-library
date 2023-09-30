@@ -12,33 +12,44 @@ using namespace std;
 
 class Xorshift {
     public:
-        Xorshift(uint32_t seed): x(seed) {
+        Xorshift(uint32_t seed): x_(seed) {
             assert(seed);
         }
 
-        uint32_t randrange(uint32_t end) {
+        uint32_t randrange(uint32_t stop) {
+            // [0, stop)
+            assert(stop > 0);
             next();
-            return x % end;
+            return x_ % stop;
         }
 
-        uint32_t randrange(uint32_t begin, uint32_t end) {
+        uint32_t randrange(uint32_t start, uint32_t stop) {
+            // [start, stop)
+            assert(start < stop);
             next();
-            return begin + x % (end - begin);
+            return start + x_ % (stop - start);
+        }
+
+        uint32_t randint(uint32_t a, uint32_t b) {
+            // [a, b]
+            assert(a <= b);
+            return randrange(a, b + 1);
         }
 
         double uniform() {
+            // [0.0, 1.0]
             next();
-            return static_cast<double>(x) / static_cast<double>(UINT32_MAX);
+            return static_cast<double>(x_) / static_cast<double>(UINT32_MAX);
         }
 
     private:
         uint32_t next() {
-            x ^= x << 13;
-            x ^= x >> 7;
-            x ^= x << 17;
+            x_ ^= x_ << 13;
+            x_ ^= x_ >> 7;
+            x_ ^= x_ << 17;
         }
 
-        uint32_t x;
+        uint32_t x_;
 };
 
 class IndexSet {
