@@ -43,7 +43,7 @@ class Xorshift {
         }
 
     private:
-        uint32_t next() {
+        void next() {
             x_ ^= x_ << 13;
             x_ ^= x_ >> 7;
             x_ ^= x_ << 17;
