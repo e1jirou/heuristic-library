@@ -1,6 +1,8 @@
 #pragma GCC optimize("O3")
 #pragma GCC optimize("unroll-loops")
 
+// #define NDEBUG
+
 #include <bits/stdc++.h>
 // #include <atcoder/all>
 
