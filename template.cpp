@@ -38,7 +38,7 @@ class Xorshift {
             return randrange(a, b + 1);
         }
 
-        double uniform() {
+        double random() {
             // [0.0, 1.0]
             next();
             return static_cast<double>(x_) / static_cast<double>(UINT32_MAX);
@@ -102,38 +102,75 @@ class IndexSet {
 
 class Timer {
     public:
+        Timer() {
+            begin();
+            elapsed_time_ = 0.0;
+        }
+
         void begin() {
             start_time_ = chrono::system_clock::now();
         }
 
-        double get_time() const {
+        double get_time() {
             chrono::system_clock::time_point end_time = chrono::system_clock::now();
-            double elapsed_time = chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time_).count();
-            elapsed_time *= 1e-9; // nanoseconds -> seconds
-            return elapsed_time;
+            elapsed_time_ = chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time_).count();
+            elapsed_time_ *= 1e-9; // nanoseconds -> seconds
+            return elapsed_time_;
         }
 
-        bool yet(double time_limit) const {
+        double get_last_time() {
+            return elapsed_time_;
+        }
+
+        bool yet(double time_limit) {
             return get_time() < time_limit;
         }
 
-        double progress(double time_limit) const {
+        double progress(double time_limit) {
             return get_time() / time_limit;
-        }
-
-        bool annealing_scheduler(double profit, Xorshift& engine, double time_limit, double t0, double t1) const {
-            assert(0.0 <= t1 && t1 <= t0);
-            if (profit >= 0.0) {
-                return true;
-            } else {
-                double ratio = progress(time_limit);
-                double t = pow(t0, 1.0 - ratio) * pow(t1, ratio);
-                return engine.uniform() < pow(2.0, profit/t);
-            }
         }
 
     private:
         chrono::system_clock::time_point start_time_;
+        double elapsed_time_;
+};
+
+constexpr size_t sa_time_steps = 1024;
+constexpr size_t sa_random_steps = 1024;
+
+class SimulatedAnnealing {
+    public:
+        SimulatedAnnealing(double t0, double t1, double time_limit): time_limit_(time_limit) {
+            assert(t0 >= t1);
+            for (int i = 0; i < sa_time_steps; ++i) {
+                double progress = static_cast<double>(i) / static_cast<double>(sa_time_steps);
+                temperatures_[i] = pow(t0, 1.0 - progress) * pow(t1, progress);
+            }
+            for (int i = 0; i < sa_random_steps; ++i) {
+                log2_random_[i] = log2(static_cast<double>(i + 1) / static_cast<double>(sa_random_steps));
+            }
+        }
+
+        bool move(double profit, Timer& timer, Xorshift& engine) {
+            if (profit >= 0.0) {
+                return true;
+            } else {
+                double t = get_temperature(timer);
+                return profit > t * log2_random_[engine.randrange(sa_random_steps)];
+            }
+        }
+
+    private:
+        double get_temperature(Timer& timer) {
+            // size_t i = timer.get_time() * (static_cast<double>(sa_time_steps) / time_limit_);
+            size_t i = timer.get_last_time() * (static_cast<double>(sa_time_steps) / time_limit_);
+            i = max(0ul, min(i, sa_time_steps - 1ul));
+            return temperatures_[i];
+        }
+
+        double time_limit_;
+        array<double,sa_time_steps> temperatures_;
+        array<double,sa_random_steps> log2_random_;
 };
 
 constexpr double time_limit = 1.95; // TODO
@@ -157,9 +194,7 @@ struct Solver {
     Timer timer;
     const Input input;
 
-    Solver(const Input& input): input(input) {
-        timer.begin();
-    }
+    Solver(const Input& input): input(input) {}
 
     void solve() {
         // TODO
