@@ -142,11 +142,11 @@ class SimulatedAnnealing {
     public:
         SimulatedAnnealing(double t0, double t1, double time_limit): time_limit_(time_limit) {
             assert(t0 >= t1);
-            for (int i = 0; i < sa_time_steps; ++i) {
+            for (size_t i = 0; i < sa_time_steps; ++i) {
                 double progress = static_cast<double>(i) / static_cast<double>(sa_time_steps);
                 temperatures_[i] = pow(t0, 1.0 - progress) * pow(t1, progress);
             }
-            for (int i = 0; i < sa_random_steps; ++i) {
+            for (size_t i = 0; i < sa_random_steps; ++i) {
                 log2_random_[i] = log2(static_cast<double>(i + 1) / static_cast<double>(sa_random_steps));
             }
         }
