@@ -135,8 +135,8 @@ class Timer {
         double elapsed_time_;
 };
 
-constexpr size_t sa_time_steps = 1024;
-constexpr size_t sa_random_steps = 1024;
+constexpr size_t sa_time_steps = (1 << 13);
+constexpr size_t sa_random_steps = (1 << 12);
 
 class SimulatedAnnealing {
     public:
