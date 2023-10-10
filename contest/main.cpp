@@ -118,7 +118,7 @@ class Timer {
             return elapsed_time_;
         }
 
-        double get_last_time() {
+        double get_last_time() const {
             return elapsed_time_;
         }
 
@@ -151,7 +151,7 @@ class SimulatedAnnealing {
             }
         }
 
-        bool move(double profit, Timer& timer, Xorshift& engine) {
+        bool move(double profit, const Timer& timer, Xorshift& engine) {
             if (profit >= 0.0) {
                 return true;
             } else {
@@ -161,7 +161,7 @@ class SimulatedAnnealing {
         }
 
     private:
-        double get_temperature(Timer& timer) {
+        double get_temperature(const Timer& timer) {
             // size_t i = timer.get_time() * (static_cast<double>(sa_time_steps) / time_limit_);
             size_t i = timer.get_last_time() * (static_cast<double>(sa_time_steps) / time_limit_);
             i = max(0ul, min(i, sa_time_steps - 1ul));
@@ -210,13 +210,17 @@ struct Solver {
 };
 
 void multi_test(int cases) {
+    if (cases <= 0) {
+        return;
+    }
     cerr << "cases: " << cases << endl;
 
-    ll sum_scores = 0;
-    double sum_time = 0.0;
-    double max_time = 0.0;
-    int max_time_seed = -1;
+    vector<ll> scores(cases);
+    vector<double> times(cases);
 
+#ifndef ONLINE_JUDGE
+    #pragma omp parallel for
+#endif
     for (int seed = 0; seed < cases; ++seed) {
         string filename = "in/";
         filename += '0' + seed / 1000;
@@ -231,20 +235,14 @@ void multi_test(int cases) {
         Solver solver(input);
         solver.solve();
 
-        double elapsed_time = solver.timer.get_time();
+        times[seed] = solver.timer.get_time();
+        scores[seed] = solver.score();
 
-        cerr << filename << " " << solver.score() << " " << elapsed_time << " sec" << endl;
-        sum_scores += solver.score();
-
-        sum_time += elapsed_time;
-        if (elapsed_time > max_time) {
-            max_time = elapsed_time;
-            max_time_seed = seed;
-        }
+        cerr << filename << " " << scores[seed] << " " << times[seed] << " sec" << endl;
     }
-    cerr << "Average Score: " << sum_scores / max(1, cases) << endl;
-    cerr << "Max Time: " << max_time << " sec (seed = " << max_time_seed << ")" << endl;
-    cerr << "Average Time: " << sum_time / max(1, cases) << " sec" << endl;
+    cerr << "Average Score: " << accumulate(scores.begin(), scores.end(), 0) / cases << endl;
+    cerr << "Max Time: " << *max_element(times.begin(), times.end()) << " sec" << endl;
+    cerr << "Average Time: " << accumulate(times.begin(), times.end(), 0.0) / cases << " sec" << endl;
 }
 
 int main() {
