@@ -44,6 +44,11 @@ class Xorshift {
             return static_cast<double>(x_) / static_cast<double>(UINT32_MAX);
         }
 
+        double uniform(double a, double b) {
+            // [a, b] or [b, a]
+            return a + (b - a) * random();
+        }
+
     private:
         void next() {
             x_ ^= x_ << 13;
@@ -86,11 +91,11 @@ class IndexSet {
             return data_[engine.randrange(data_.size())];
         }
 
-        vector<int> all_data() const {
+        vector<int> get_data() const {
             return data_;
         }
 
-        int size() const {
+        size_t size() const {
             return data_.size();
         }
 
