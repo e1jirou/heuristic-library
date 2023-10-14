@@ -168,7 +168,7 @@ class SimulatedAnnealing {
     private:
         double get_temperature(const Timer& timer) {
             // size_t i = timer.get_time() * (static_cast<double>(sa_time_steps) / time_limit_);
-            size_t i = timer.get_last_time() * (static_cast<double>(sa_time_steps) / time_limit_);
+            size_t i = static_cast<size_t>(timer.get_last_time() * (static_cast<double>(sa_time_steps) / time_limit_));
             i = max(0ul, min(i, sa_time_steps - 1ul));
             return temperatures_[i];
         }
