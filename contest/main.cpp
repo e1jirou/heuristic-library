@@ -227,12 +227,8 @@ void multi_test(int cases) {
     #pragma omp parallel for
 #endif
     for (int seed = 0; seed < cases; ++seed) {
-        string filename = "in/";
-        filename += '0' + seed / 1000;
-        filename += '0' + (seed / 100) % 10;
-        filename += '0' + (seed / 10) % 10;
-        filename += '0' + seed % 10;
-        filename += ".txt";
+        string filename = to_string(seed);
+        filename = "in/" + string(4 - filename.size(), '0') + filename + ".txt";
  
         Input input;
         input.input(filename);
