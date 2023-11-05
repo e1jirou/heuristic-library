@@ -63,21 +63,21 @@ class IndexSet {
     public:
         IndexSet(int n) : n_(n), positions_(n, -1) {}
 
-        void add(int x) {
+        void insert(int x) {
             assert(0 <= x && x < n_);
             assert(!contains(x));
             positions_[x] = data_.size();
             data_.push_back(x);
         }
 
-        void remove(int x) {
+        void erase(int x) {
             assert(0 <= x && x < n_);
             assert(contains(x));
-            int pos = positions_[x];
+            int i = positions_[x];
             int y = data_.back();
-            data_[pos] = y;
+            data_[i] = y;
             data_.pop_back();
-            positions_[y] = pos;
+            positions_[y] = i;
             positions_[x] = -1;
         }
 
@@ -238,6 +238,10 @@ void multi_test(int cases) {
 
         times[seed] = solver.timer.get_time();
         scores[seed] = solver.score();
+
+        double random_time = Xorshift(seed + 1).uniform(0.0, 0.01);
+        Timer timer;
+        while (timer.yet(random_time)) {}
 
         cerr << filename << " " << scores[seed] << " " << times[seed] << " sec" << endl;
     }
