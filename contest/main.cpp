@@ -4,10 +4,10 @@
 // #define NDEBUG
 
 #include <bits/stdc++.h>
-// #include <atcoder/all>
+#include <atcoder/all>
 
 using namespace std;
-// using namespace atcoder;
+using namespace atcoder;
 
 #define ll long long int
 #define ull unsigned long long int
