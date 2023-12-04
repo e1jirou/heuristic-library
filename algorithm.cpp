@@ -67,7 +67,7 @@ inline int index(const vector<T>& data, const T x) {
 
 template <class T>
 inline bool contain(const vector<T>& data, T x) {
-    return find(data.begin(), data.end(), x) < data.end();
+    return find(data.begin(), data.end(), x) != data.end();
 }
 
 template <class T>
