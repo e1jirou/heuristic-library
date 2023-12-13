@@ -41,7 +41,7 @@ class Xorshift {
         double random() {
             // [0.0, 1.0]
             next();
-            return static_cast<double>(x_) / static_cast<double>(UINT32_MAX);
+            return static_cast<double>(x_) * (1.0 / static_cast<double>(UINT32_MAX));
         }
 
         double uniform(double a, double b) {
