@@ -155,6 +155,37 @@ vector<ll> divisors(ll n) {
     return ret;
 }
 
+vector<vector<mint>> dot(const vector<vector<mint>>& a, const vector<vector<mint>>& b) {
+    assert(a[0].size() == b.size());
+    vector<vector<mint>> ret(a.size(), vector<mint>(b[0].size()));
+    for (size_t i = 0; i < a.size(); ++i) {
+        for (size_t j = 0; j < b[i].size(); ++j) {
+            mint tmp = 0;
+            for (size_t k = 0; k < b.size(); ++k) {
+                tmp += a[i][k] * b[k][j];
+            }
+            ret[i][j] = tmp;
+        }
+    }
+    return ret;
+}
+
+vector<vector<mint>> matrix_power(const vector<vector<mint>>& a, ull exp) {
+    assert(a.size() == a[0].size());
+    int n = a.size();
+    vector<vector<mint>> ret(n, vector<mint>(n, 0));
+    for (int i = 0; i < n; ++i) {
+        ret[i][i] = 1;
+    }
+    for (int i = bit_width(exp) - 1; i >= 0; --i) {
+        ret = dot(ret, ret);
+        if ((exp >> i) & 1) {
+            ret = dot(ret, a);
+        }
+    }
+    return ret;
+}
+
 int main() {
     ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
