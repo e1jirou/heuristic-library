@@ -106,6 +106,38 @@ vector<vector<int>> combinations(int n, int k) {
     return ret;
 }
 
+struct Factorials {
+    int n;
+    vector<mint> fct;
+    vector<mint> rcp;
+
+    Factorials(int n) : n(n), fct(n), rcp(n) {
+        fct[0] = 1;
+        for (int i = 1; i < n; ++i) {
+            fct[i] = i * fct[i - 1];
+        }
+        rcp[n - 1] = fct[n - 1].inv();
+        for (int i = n - 1; i > 0; --i) {
+            rcp[i - 1] = i * rcp[i];
+        }
+    }
+
+    mint comb(int i, int j) {
+        assert(0 <= j && j <= i && i < n);
+        return fct[i] * rcp[j] * rcp[i - j];
+    }
+
+    mint perm(int i, int j) {
+        assert(0 <= j && j <= i && i < n);
+        return fct[i] * rcp[j];
+    }
+
+    mint inv(int i) {
+        assert(0 < i && i <= n);
+        return fct[i - 1] * rcp[i];
+    }
+};
+
 int main() {
     ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
