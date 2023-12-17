@@ -138,6 +138,23 @@ struct Factorials {
     }
 };
 
+vector<ll> divisors(ll n) {
+    vector<ll> ret;
+    ll d = 1;
+    while (d * d < n) {
+        if (n % d == 0) {
+            ret.push_back(d);
+            ret.push_back(n / d);
+        }
+        ++d;
+    }
+    if (d * d == n) {
+        ret.push_back(d);
+    }
+    sort(ret.begin(), ret.end());
+    return ret;
+}
+
 int main() {
     ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
