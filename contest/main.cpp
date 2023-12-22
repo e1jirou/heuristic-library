@@ -6,6 +6,10 @@
 #include <bits/stdc++.h>
 #include <atcoder/all>
 
+#ifndef ONLINE_JUDGE
+#include <omp.h>
+#endif // ONLINE_JUDGE
+
 using namespace std;
 using namespace atcoder;
 
@@ -209,12 +213,19 @@ struct Solver {
         // TODO
     }
 
+    void print(const string& filename) const {
+        ofstream out(filename);
+        assert(out);
+
+        // TODO
+    }
+
     ll score() const {
         // TODO
     }
 };
 
-void multi_test(int cases) {
+void multi_test(int cases, int num_threads) {
     if (cases <= 0) {
         return;
     }
@@ -224,8 +235,9 @@ void multi_test(int cases) {
     vector<double> times(cases);
 
 #ifndef ONLINE_JUDGE
+    omp_set_num_threads(num_threads);
     #pragma omp parallel for
-#endif
+#endif // ONLINE_JUDGE
     for (int seed = 0; seed < cases; ++seed) {
         string filename = to_string(seed);
         filename = "in/" + string(4 - filename.size(), '0') + filename + ".txt";
@@ -239,11 +251,9 @@ void multi_test(int cases) {
         times[seed] = solver.timer.get_time();
         scores[seed] = solver.score();
 
-        double random_time = Xorshift(seed + 1).uniform(0.0, 0.01);
-        Timer timer;
-        while (timer.yet(random_time)) {}
-
         cerr << filename << " " << scores[seed] << " " << times[seed] << " sec" << endl;
+
+        solver.print("out" + filename.substr(2));
     }
     cerr << "Average Score: " << accumulate(scores.begin(), scores.end(), 0) / cases << endl;
     cerr << "Max Time: " << *max_element(times.begin(), times.end()) << " sec" << endl;
@@ -265,8 +275,9 @@ int main() {
     cerr << "Score = " << solver.score() << ", " << solver.timer.get_time() << " sec" << endl;
 
     int cases = 0;
-    multi_test(cases);
-#endif
+    int num_threads = 20;
+    multi_test(cases, num_threads);
+#endif // ONLINE_JUDGE
 
     return 0;
 }
