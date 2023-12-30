@@ -56,12 +56,12 @@ inline int argmax(const vector<T>& data) {
 }
 
 template <class T>
-inline void remove(vector<T>& data, T x) {
+inline void remove_all(vector<T>& data, T x) {
     data.erase(remove(data.begin(), data.end(), x), data.end());
 }
 
 template <class T>
-inline int index(const vector<T>& data, const T x) {
+inline int get_index(const vector<T>& data, const T x) {
     return distance(data.begin(), find(data.begin(), data.end(), x));
 }
 
@@ -106,36 +106,48 @@ vector<vector<int>> combinations(int n, int k) {
     return ret;
 }
 
-struct Factorials {
-    int n;
-    vector<mint> fct;
-    vector<mint> rcp;
-
-    Factorials(int n) : n(n), fct(n), rcp(n) {
-        fct[0] = 1;
-        for (int i = 1; i < n; ++i) {
-            fct[i] = i * fct[i - 1];
+class Factorials {
+    public:
+        explicit Factorials(int n) : n_(n), fct_(n), rcp_(n) {
+            fct_[0] = 1;
+            for (int i = 1; i < n_; ++i) {
+                fct_[i] = i * fct_[i - 1];
+            }
+            rcp_[n_ - 1] = fct_[n_ - 1].inv();
+            for (int i = n_ - 1; i > 0; --i) {
+                rcp_[i - 1] = i * rcp_[i];
+            }
         }
-        rcp[n - 1] = fct[n - 1].inv();
-        for (int i = n - 1; i > 0; --i) {
-            rcp[i - 1] = i * rcp[i];
+
+        mint fact(int i) const {
+            assert(0 <= i && i < n_);
+            return fct_[i];
         }
-    }
 
-    mint comb(int i, int j) {
-        assert(0 <= j && j <= i && i < n);
-        return fct[i] * rcp[j] * rcp[i - j];
-    }
+        mint fact_inv(int i) const {
+            assert(0 <= i && i < n_);
+            return rcp_[i];
+        }
 
-    mint perm(int i, int j) {
-        assert(0 <= j && j <= i && i < n);
-        return fct[i] * rcp[j];
-    }
+        mint comb(int i, int j) const {
+            assert(0 <= j && j <= i && i < n_);
+            return fct_[i] * rcp_[j] * rcp_[i - j];
+        }
 
-    mint inv(int i) {
-        assert(0 < i && i <= n);
-        return fct[i - 1] * rcp[i];
-    }
+        mint perm(int i, int j) const {
+            assert(0 <= j && j <= i && i < n_);
+            return fct_[i] * rcp_[j];
+        }
+
+        mint inv(int i) const {
+            assert(0 < i && i <= n_);
+            return fct_[i - 1] * rcp_[i];
+        }
+
+    private:
+        int n_;
+        vector<mint> fct_;
+        vector<mint> rcp_;
 };
 
 vector<ll> divisors(ll n) {
@@ -186,9 +198,54 @@ vector<vector<mint>> matrix_power(const vector<vector<mint>>& a, ull exp) {
     return ret;
 }
 
+template <class S, S (*op)(S, S), S (*e)()>
+class SlidingWindowAggregation {
+    public:
+        explicit SlidingWindowAggregation() {
+            former_.push_back(e());
+            latter_.push_back(e());
+        }
+
+        size_t size() const {
+            return former_.size() + latter_.size() - 2;
+        }
+
+        S get() const {
+            return op(former_.back(), latter_.back());
+        }
+
+        void push(S x) {
+            data_.push_back(x);
+            latter_.push_back(op(latter_.back(), x));
+        }
+
+        void pop() {
+            if (former_.size() == 1) {
+                assert(latter_.size() >= 2);
+                reconstruct();
+            } else {
+                former_.pop_back();
+            }
+        }
+
+    private:
+        vector<S> data_;
+        vector<S> former_;
+        vector<S> latter_;
+
+        void reconstruct() {
+            for (int i = data_.size() - 1; i > 0; --i) {
+                former_.push_back(op(former_.back(), data_[i]));
+            }
+            data_.clear();
+            latter_.erase(latter_.begin() + 1, latter_.end());
+        }
+};
+
 int main() {
     ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
+    cout << fixed << setprecision(10);
 
     // TODO
 
