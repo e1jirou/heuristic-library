@@ -242,6 +242,102 @@ class SlidingWindowAggregation {
         }
 };
 
+template <class S, S (*rooting)(S), S (*op)(S, S), S (*e)()>
+class Rerooting {
+    public:
+        explicit Rerooting(int n) {
+            n_ = n;
+            edges_.resize(n_);
+        }
+
+        void add_edge(int u, int v) {
+            assert(0 <= u && u < n_);
+            assert(0 <= v && v < n_);
+            edges_[u].push_back(v);
+            edges_[v].push_back(u);
+        }
+
+        vector<S> rerooting(int root=0) {
+            dfs(root);
+            bottom_up();
+            return top_down();
+        }
+
+    private:
+        int n_;
+        vector<vector<int>> edges_;
+        vector<vector<int>> children_;
+        vector<int> order_;
+        vector<vector<S>> forward_;
+        vector<vector<S>> backward_;
+
+        void dfs(int root) {
+            vector<bool> visited(n_, false);
+            visited[root] = true;
+
+            order_ = {root};
+            order_.reserve(n_);
+            size_t head = 0;
+
+            children_ = vector<vector<int>>(n_);
+
+            while (head < order_.size()) {
+                int u = order_[head++];
+                children_[u].reserve(edges_[u].size());
+                for (int v : edges_[u]) {
+                    if (visited[v]) {
+                        continue;
+                    }
+                    visited[v] = true;
+                    children_[u].push_back(v);
+                    order_.push_back(v);
+                    
+                }
+            }
+            assert(static_cast<int>(head) == n_);
+        }
+
+        void bottom_up() {
+            vector<S> dp(n_, e());
+            forward_ = vector<vector<S>>(n_);
+            backward_ = vector<vector<S>>(n_);
+
+            for (int i = n_ - 1; i >= 0; --i) {
+                int v = order_[i];
+                const vector<int>& children_v = children_[v];
+
+                vector<S>& forward_v = forward_[v];
+                forward_v.resize(children_v.size() + 1, e());
+                for (size_t j = 0; j < children_v.size(); ++j) {
+                    forward_v[j + 1] = op(forward_v[j], dp[children_v[j]]);
+                }
+                vector<S>& backward_v = backward_[v];
+                backward_v.resize(children_v.size() + 1, e());
+                for (size_t j = children_v.size(); j > 0; --j) {
+                    backward_v[j - 1] = op(dp[children_v[j - 1]], backward_v[j]);
+                }
+                assert(forward_v.back() == backward_v.front());
+                dp[v] = rooting(backward_v[0]);
+            }
+        }
+
+        vector<S> top_down() const {
+            vector<S> ret(n_, e());
+            vector<S> dp(n_, e());
+            for (int v : order_) {
+                const vector<S>& forward_v = forward_[v];
+                const vector<S>& backward_v = backward_[v];
+                const vector<int>& children_v = children_[v];
+                S dp_v = dp[v];
+                ret[v] = rooting(op(dp_v, backward_v[0]));
+                for (size_t i = 0; i < children_v.size(); ++i) {
+                    dp[children_v[i]] = rooting(op(dp_v, op(forward_v[i], backward_v[i + 1])));
+                }
+            }
+            return ret;
+        }
+};
+
 int main() {
     ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
