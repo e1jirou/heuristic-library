@@ -338,6 +338,89 @@ class Rerooting {
         }
 };
 
+class LowestCommonAncestor {
+    public:
+        explicit LowestCommonAncestor(int n, const vector<vector<int>>& edges, int root) {
+            assert(static_cast<int>(edges.size()) == n);
+            assert(0 <= root && root < n);
+
+            n_ = n;
+            vector<int> parents = dfs(edges, root);
+            doubling(parents);
+        }
+
+        int get_depth(int v) const {
+            assert(0 <= v && v < n_);
+            return depths_[v];
+        }
+
+        int lca(int u, int v) const {
+            if (depths_[u] > depths_[v]) {
+                swap(u, v);
+            }
+            uint32_t d = depths_[v] - depths_[u];
+            while (d) {
+                int i = countr_zero(d);
+                v = table_[i][v];
+                d ^= (1u << i);
+            }
+            if (u == v) {
+                return v;
+            }
+            for (int i = bit_width(static_cast<uint32_t>(depths_[v])) - 1; i >= 0; --i) {
+                if (table_[i][u] != table_[i][v]) {
+                    u = table_[i][u];
+                    v = table_[i][v];
+                }
+            }
+            return table_[0][v];
+        }
+
+    private:
+        int n_;
+        vector<int> depths_;
+        vector<vector<int>> table_;
+
+        vector<int> dfs(const vector<vector<int>>& edges, int root) {
+            depths_ = vector<int>(n_, -1);
+            depths_[root] = 0;
+
+            vector<int> parents(n_, -1);
+
+            stack<int> todo;
+            todo.push(root);
+
+            while (!todo.empty()) {
+                int u = todo.top();
+                todo.pop();
+                for (int v : edges[u]) {
+                    if (depths_[v] == -1) {
+                        depths_[v] = depths_[u] + 1;
+                        parents[v] = u;
+                        todo.push(v);
+                    }
+                }
+            }
+            return parents;
+        }
+
+        void doubling(const vector<int>& parents) {
+            uint32_t max_depth = *max_element(depths_.begin(), depths_.end());
+            table_ = vector<vector<int>>(bit_width(max_depth), vector<int>(n_, -1));
+            table_[0] = parents;
+
+            for (size_t i = 1; i < table_.size(); ++i) {
+                const vector<int>& fr = table_[i - 1];
+                vector<int>& to = table_[i];
+                for (int v = 0; v < n_; ++v) {
+                    if (fr[v] != -1) {
+                        to[v] = fr[fr[v]];
+                    }
+                }
+            }
+        }
+};
+
 int main() {
     ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
