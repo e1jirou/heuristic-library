@@ -3,14 +3,20 @@
 
 #include <bits/stdc++.h>
 #include <atcoder/all>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 
 using namespace std;
 using namespace atcoder;
+using namespace __gnu_pbds;
+
+using mint = modint998244353;
+
+// find_by_order, order_of_key
+using pbds_set = tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>;
 
 #define ll long long int
 #define ull unsigned long long int
-
-using mint = modint998244353;
 
 template<class T>
 inline void chmin(T& a, T b) {
