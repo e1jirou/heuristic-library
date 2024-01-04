@@ -1,291 +1,437 @@
 #include <bits/stdc++.h>
-
 using namespace std;
 
-#define ll long long int
-#define ull unsigned long long int
+// メモリの再利用を行いつつ集合を管理するクラス
+template<class T>
+class ObjectPool {
+    public:
+        // 配列と同じようにアクセスできる
+        T& operator[](int i) {
+            return data_[i];
+        }
 
-using Action = int; // TODO
-using Evaluation = ll; // TODO
-using Hash = ull; // TODO
+        // 配列の長さを変更せずにメモリを確保する
+        void reserve(size_t capacity) {
+            data_.reserve(capacity);
+        }
 
-struct State {
-    int depth = 0;
+        // 要素を追加し、追加されたインデックスを返す
+        int push(const T& x) {
+            if (garbage_.empty()) {
+                data_.push_back(x);
+                return data_.size() - 1;
+            } else {
+                int i = garbage_.top();
+                garbage_.pop();
+                data_[i] = x;
+                return i;
+            }
+        }
 
+        // 要素を（見かけ上）削除する
+        void pop(int i) {
+            garbage_.push(i);
+        }
+
+        // 使用した最大のインデックス(+1)を得る
+        // この値より少し大きい値をreserveすることでメモリの再割り当てがなくなる
+        size_t size() {
+            return data_.size();
+        }
+
+    private:
+        vector<T> data_;
+        stack<int> garbage_;
+};
+
+using Hash = unsigned long long;
+
+// 状態遷移を行うために必要な情報
+// メモリ使用量をできるだけ小さくしてください
+struct Action {
     // TODO
 
-    State() {
-        // TODO
-    }
-
-    vector<tuple<Action,Evaluation,Hash>> get_actions(Evaluation evaluation, Hash hash) {
-        // TODO
-    }
-
-    void move_forward(Action action) {
-        ++depth;
-
-        // TODO
-    }
-
-    void move_backward(Action action) {
-        --depth;
-
-        // TODO
-    }
-
-    bool finished() {
+    Action() {
         // TODO
     }
 };
 
-// doubly chained tree
+// 状態のコストを比較するための構造体
+// メモリ使用量をできるだけ小さくしてください
+struct Evaluation {
+    // TODO
 
+    Evaluation() {
+        // TODO
+    }
+
+    // 低いほどよい
+    bool operator<(const Evaluation& other) const {
+        // TODO
+    }
+};
+
+// 展開するノードの候補を表す構造体
+struct Candidate {
+    Evaluation evaluation;
+    Action action;
+    Hash hash;
+    int parent;
+
+    Candidate(Evaluation evaluation, Action action, Hash hash, int parent) :
+        evaluation(evaluation),
+        action(action),
+        hash(hash),
+        parent(parent) {}
+
+    bool operator<(const Candidate& other) const {
+        return evaluation < other.evaluation;
+    }
+};
+
+// Selectorの設定
+struct SelectorConfig {
+    size_t beam_width;
+    size_t candidates_capacity;
+    bool clear_hashes_by_turn;
+
+    SelectorConfig() {}
+
+    SelectorConfig(size_t beam_width, size_t candidates_capacity, bool clear_hashes_by_turn) :
+        beam_width(beam_width),
+        candidates_capacity(candidates_capacity),
+        clear_hashes_by_turn(clear_hashes_by_turn) {}
+};
+
+// 実際に展開する候補を選ぶクラス
+// 必要に応じて変更してください（ex. ソートを工夫して高速化する）
+class Selector {
+    public:
+        explicit Selector(const SelectorConfig& selector_config) {
+            selector_config_ = selector_config;
+            candidates_.reserve(selector_config.candidates_capacity);
+            hashes_.reserve(selector_config.beam_width);
+        }
+
+        // 候補を追加する
+        // ターン数最小化型の問題で、candidateによって実行可能解が得られる場合にのみ finished = true とする
+        void push(const Candidate& candidate, bool finished) {
+            if (finished) {
+                finished_candidates_.push_back(candidate);
+            } else {
+                candidates_.push_back(candidate);
+            }
+        }
+
+        // ビーム幅の個数だけ、評価がよいものを選ぶ
+        // ハッシュ値が一致したものについては、評価がよいほうのみを残す
+        // ソートがボトルネックになる場合がある
+        const vector<Candidate>& select() {
+            sort(candidates_.begin(), candidates_.end());
+
+            size_t left = 0;
+            for (size_t right = 0; right < candidates_.size(); ++right) {
+                if (!hashes_.insert(candidates_[right].hash).second) {
+                    continue;
+                }
+                candidates_[left++] = candidates_[right];
+                if (left >= selector_config_.beam_width) {
+                    break;
+                }
+            }
+
+            candidates_.erase(candidates_.begin() + left, candidates_.end());
+
+            return candidates_;
+        }
+
+        // 実行可能解が見つかったか
+        bool have_finished() {
+            return !finished_candidates_.empty();
+        }
+
+        // 実行可能解に到達する「候補」を返す
+        vector<Candidate> get_finished_candidates() {
+            return finished_candidates_;
+        }
+
+        // 次のイテレーションに向けて準備する
+        void clear() {
+            candidates_.clear();
+            
+            if (selector_config_.clear_hashes_by_turn) {
+                hashes_.clear();
+            }
+        }
+
+    private:
+        SelectorConfig selector_config_;
+        vector<Candidate> candidates_;
+        unordered_set<Hash> hashes_;
+        vector<Candidate> finished_candidates_;
+};
+
+// 深さ優先探索に沿って更新する情報をまとめたクラス
+class State {
+    public:
+        explicit State() {}
+
+        explicit State(/* const Input& input */) {
+            // TODO
+        }
+
+        // 次の状態候補を全てselectorに追加する
+        // 引数
+        //   evaluation: 今の評価
+        //   hash      : 今のハッシュ値
+        //   parent    : 今のノードID（次のノードにとって親となる）
+        void expand(const Evaluation& evaluation, Hash hash, int parent, Selector& selector) {
+            // TODO
+        }
+
+        // actionを実行して次の状態に遷移する
+        void move_forward(Action action) {
+            // TODO
+        }
+
+        // actionを実行する前の状態に遷移する
+        // 今の状態は、親からactionを実行して遷移した状態である
+        void move_backward(Action action) {
+            // TODO
+        }
+
+    private:
+        // TODO
+};
+
+// 探索木（二重連鎖木）のノード
 struct Node {
     Action action;
-    int parent;
-    int child = -1;
-    int left; // sibling
-    int right = -1; // sibling
     Evaluation evaluation;
     Hash hash;
+    int parent, child, left, right;
 
-    Node(Action action, int parent, int left, Evaluation evaluation, Hash hash) :
+    // 根のコンストラクタ
+    Node(Action action, const Evaluation& evaluation, Hash hash) :
         action(action),
-        parent(parent),
-        left(left),
         evaluation(evaluation),
-        hash(hash) {}
+        hash(hash),
+        parent(-1),
+        child(-1),
+        left(-1),
+        right(-1) {}
 
-    void set_right(int v) {
-        right = v;
-    }
-
-    void set_child(int v) {
-        child = v;
-    }
-
-    void get_path(vector<Action>& path, vector<Node>& nodes) {
-        if (parent == -1) {
-            // root
-            reverse(path.begin(), path.end());
-        } else {
-            path.push_back(action);
-            nodes[parent].get_path(path, nodes);
-        }
-    }
+    // 通常のコンストラクタ
+    Node(const Candidate& candidate, int right) :
+        action(candidate.action),
+        evaluation(candidate.evaluation),
+        hash(candidate.hash),
+        parent(candidate.parent),
+        child(-1),
+        left(-1),
+        right(right) {}
 };
 
-constexpr size_t beam_width = 100; // TODO
-constexpr int max_turn = 1000; // TODO
-constexpr size_t branches = 4; // TODO
-constexpr size_t nodes_size = 10000; // TODO
+// 二重連鎖木に対する操作をまとめたクラス
+class Tree {
+    public:
+        explicit Tree(const State& state, size_t nodes_capacity, const Node& root) {
+            state_ = state;
+            nodes_.reserve(nodes_capacity);
+            root_ = nodes_.push(root);
+        }
 
-pair<int,vector<Action>> beam_search_on_forest(const vector<pair<State,Node>>& roots) {
+        // 状態を更新しながら深さ優先探索を行い、次のノードの候補を全てselectorに追加する
+        void dfs(Selector& selector) {
+            update_root();
 
-    struct Candidate {
-        Action action;
-        int parent;
-        Evaluation evaluation;
-        Hash hash;
-        int tree_id;
-
-        Candidate(Action action, int parent, Evaluation evaluation, Hash hash, int tree_id) :
-            action(action),
-            parent(parent),
-            evaluation(evaluation),
-            hash(hash),
-            tree_id(tree_id) {}
-    };
-
-    struct Tree {
-        State state;
-        int id;
-        int root;
-        bool valid = true;
-
-        Tree(const State& state, int id) :
-            state(state),
-            id(id),
-            root(id) {}
-
-        pair<int,vector<Action>> dfs(vector<Node>& nodes, int turn, vector<Candidate>& candidates) {
-            if (!valid) {
-                return {-1, {}};
-            }
-            // go down the direct road
-            while (nodes[root].child != -1 && nodes[nodes[root].child].right == -1) {
-                root = nodes[root].child;
-                state.move_forward(nodes[root].action);
-            }
-            int v = root;
+            int v = root_;
             while (true) {
-                // go to child
-                while (nodes[v].child != -1) {
-                    v = nodes[v].child;
-                    state.move_forward(nodes[v].action);
-                }
-                assert(state.depth == turn);
-
-                if (state.finished()) {
-                    // found the solution
-                    vector<Action> path;
-                    path.reserve(turn);
-                    nodes[v].get_path(path, nodes);
-                    return {id, path};
-                }
-                // enumerate children
-                for (auto [action, evaluation, hash] : state.get_actions(nodes[v].evaluation, nodes[v].hash)) {
-                    candidates.emplace_back(Candidate(action, v, evaluation, hash, id));
-                }
-                while (v != root && nodes[v].right == -1) {
-                    // go to parent
-                    state.move_backward(nodes[v].action);
-                    v = nodes[v].parent;
-                }
-                if (v == root) {
+                v = move_to_leaf(v);
+                state_.expand(nodes_[v].evaluation, nodes_[v].hash, v, selector);
+                v = move_to_ancestor(v);
+                if (v == root_) {
                     break;
                 }
-                // go to right sibling
-                state.move_backward(nodes[v].action);
-                v = nodes[v].right;
-                state.move_forward(nodes[v].action);
-            }
-            return {-1, {}};
-        }
-    };
-
-    vector<Tree> forest;
-    forest.reserve(roots.size());
-
-    vector<Node> nodes;
-    nodes.reserve(nodes_size);
-
-    stack<int> garbage; // store deleted node indices
-
-    shared_ptr<vector<int>> temp_nodes(new vector<int>);
-    temp_nodes->reserve(beam_width);
-
-    shared_ptr<vector<int>> next_nodes(new vector<int>);
-    next_nodes->reserve(beam_width);
-
-    vector<Candidate> candidates;
-    candidates.reserve(branches * beam_width);
-
-    vector<int> left_memo;
-    left_memo.reserve(nodes_size);
-
-    vector<int> left_memo_using;
-    left_memo_using.reserve(beam_width);
-
-    unordered_set<Hash> hashes;
-
-    for (size_t id = 0; id < roots.size(); ++id) {
-        forest.emplace_back(Tree(roots[id].first, id));
-        nodes.emplace_back(roots[id].second);
-        temp_nodes->push_back(id);
-        left_memo.push_back(-1);
-    }
-    for (int turn = 0; turn < max_turn; ++turn) {
-        // depth first search on each tree
-        pair<int,vector<Action>> ret = {-1, {}};
-        for (Tree& tree : forest) {
-            pair<int,vector<Action>> path = tree.dfs(nodes, turn, candidates);
-            if (path.first != -1 && (ret.first == -1 || path.second.size() < ret.second.size())) {
-                ret = path;
+                v = move_to_right(v);
             }
         }
-        if (ret.first != -1) {
-            // cerr << nodes.size() << endl;
+
+        // 根からノードvまでのパスを取得する
+        vector<Action> get_path(int v) {
+            // cerr << nodes_.size() << endl;
+
+            vector<Action> path;
+            while (nodes_[v].parent != -1) {
+                path.push_back(nodes_[v].action);
+                v = nodes_[v].parent;
+            }
+            reverse(path.begin(), path.end());
+            return path;
+        }
+
+        // 新しいノードを追加する
+        int add_leaf(const Candidate& candidate) {
+            int parent = candidate.parent;
+            int sibling = nodes_[parent].child;
+            int v = nodes_.push(Node(candidate, sibling));
+
+            nodes_[parent].child = v;
+
+            if (sibling != -1) {
+                nodes_[sibling].left = v;
+            }
+            return v;
+        }
+
+        // ノードvに子がいなかった場合、vと不要な先祖を削除する
+        void remove_if_leaf(int v) {
+            if (nodes_[v].child == -1) {
+                remove_leaf(v);
+            }
+        }
+
+        // 最も評価がよいノードを返す
+        int get_best_leaf(const vector<int>& last_nodes) {
+            assert(!last_nodes.empty());
+            int ret = last_nodes[0];
+            for (int v : last_nodes) {
+                if (nodes_[v].evaluation < nodes_[ret].evaluation) {
+                    ret = v;
+                }
+            }
             return ret;
         }
-        // sort candidates
-        std::sort(candidates.begin(), candidates.end(),
-            [](const Candidate& a, const Candidate& b) {
-                return a.evaluation > b.evaluation;
-            }
-        );
-        if (turn == max_turn - 1) {
-            // make the solution
-            int v = candidates[0].parent;
-            vector<Action> path = {candidates[0].action};
-            path.reserve(turn);
-            nodes[v].get_path(path, nodes);
-            // cerr << nodes.size() << endl;
-            return {candidates[0].tree_id, path};
-        }
-        // make new nodes
-        for (const Candidate& candidate : candidates) {
-            if (!hashes.insert(candidate.hash).second) {
-                // overlap
-                continue;
-            }
-            int left = left_memo[candidate.parent];
-            int v;
-            if (garbage.empty()) {
-                v = nodes.size();
-                nodes.emplace_back(Node(candidate.action, candidate.parent, left, candidate.evaluation, candidate.hash));
-                left_memo.push_back(-1);
-            } else {
-                v = garbage.top();
-                garbage.pop();
-                nodes[v] = Node(candidate.action, candidate.parent, left, candidate.evaluation, candidate.hash);
-            }
-            if (left == -1) {
-                nodes[candidate.parent].set_child(v);
-                left_memo_using.push_back(candidate.parent);
-            } else {
-                nodes[left].set_right(v);
-            }
-            left_memo[candidate.parent] = v;
-            next_nodes->push_back(v);
-            if (next_nodes->size() == beam_width) {
-                break;
-            }
-        }
-        hashes.clear();
 
-        for (int v : left_memo_using) {
-            left_memo[v] = -1;
-        }
-        left_memo_using.clear();
+    private:
+        State state_;
+        ObjectPool<Node> nodes_;
+        int root_;
 
-        // delete redundant nodes
-        for (int v : *temp_nodes) {
-            if (nodes[v].child != -1) {
-                continue;
+        // 根から一本道の部分は往復しないようにする
+        void update_root() {
+            int child = nodes_[root_].child;
+            while (child != -1 && nodes_[child].right == -1) {
+                root_ = child;
+                state_.move_forward(nodes_[child].action);
+                child = nodes_[child].child;
             }
-            // delete v
+        }
+
+        // ノードvの子孫で、最も左にある葉に移動する
+        int move_to_leaf(int v) {
+            int child = nodes_[v].child;
+            while (child != -1) {
+                v = child;
+                state_.move_forward(nodes_[child].action);
+                child = nodes_[child].child;
+            }
+            return v;
+        }
+
+        // ノードvの先祖で、右への分岐があるところまで移動する
+        int move_to_ancestor(int v) {
+            while (v != root_ && nodes_[v].right == -1) {
+                state_.move_backward(nodes_[v].action);
+                v = nodes_[v].parent;
+            }
+            return v;
+        }
+
+        // ノードvの右のノードに移動する
+        int move_to_right(int v) {
+            state_.move_backward(nodes_[v].action);
+            v = nodes_[v].right;
+            state_.move_forward(nodes_[v].action);
+            return v;
+        }
+
+        // 不要になった葉を再帰的に削除する
+        void remove_leaf(int v) {
             while (true) {
-                assert(nodes[v].child == -1);
-                if (nodes[v].parent == -1) {
-                    // delete root
-                    assert(v < (int)forest.size());
-                    forest[v].valid = false;
-                    break;
-                }
-                garbage.push(v);
-                if (nodes[v].left != -1) {
-                    nodes[nodes[v].left].right = nodes[v].right;
-                    if (nodes[v].right != -1) {
-                        nodes[nodes[v].right].left = nodes[v].left;
+                int left = nodes_[v].left;
+                int right = nodes_[v].right;
+                if (left == -1) {
+                    int parent = nodes_[v].parent;
+
+                    if (parent == -1) {
+                        cerr << "ERROR: root is removed" << endl;
+                        exit(-1);
                     }
-                    break;
+                    nodes_.pop(v);
+                    nodes_[parent].child = right;
+                    if (right != -1) {
+                        nodes_[right].left = -1;
+                        return;
+                    }
+                    v = parent;
                 } else {
-                    nodes[nodes[v].parent].child = nodes[v].right;
-                    if (nodes[v].right != -1) {
-                        nodes[nodes[v].right].left = -1;
-                        break;
+                    nodes_.pop(v);
+                    nodes_[left].right = right;
+                    if (right != -1) {
+                        nodes_[right].left = left;
                     }
-                    v = nodes[v].parent;
+                    return;
                 }
             }
         }
-        // prepare for next iteration
-        swap(temp_nodes, next_nodes);
-        next_nodes->clear();
-        candidates.clear();
+};
+
+// ビームサーチの設定
+struct BeamSearchConfig {
+    int max_turn;
+    size_t beam_width;
+    size_t nodes_capacity;
+
+    BeamSearchConfig(int max_turn, size_t beam_width, size_t nodes_capacity) :
+        max_turn(max_turn),
+        beam_width(beam_width),
+        nodes_capacity(nodes_capacity) {}
+};
+
+// ビームサーチを行う関数
+vector<Action> beam_search(const BeamSearchConfig& beam_search_config, const SelectorConfig& selector_config, State state, Node root) {
+    Tree tree(state, beam_search_config.nodes_capacity, root);
+
+    vector<int> curr_nodes;
+    curr_nodes.reserve(beam_search_config.beam_width);
+    // 本来は curr_nodes = {state.root_} とすべきだが, 省略しても問題ない
+
+    vector<int> next_nodes;
+    next_nodes.reserve(beam_search_config.beam_width);
+
+    Selector selector(selector_config);
+
+    for (int turn = 0; turn < beam_search_config.max_turn; ++turn) {
+        tree.dfs(selector);
+
+        if (selector.have_finished()) {
+            // ターン数最小化型の問題で実行可能解が見つかったとき
+            Candidate candidate = selector.get_finished_candidates()[0];
+            vector<Action> ret = tree.get_path(candidate.parent);
+            ret.push_back(candidate.action);
+            return ret;
+        }
+        // 新しいノードを追加する
+        for (const Candidate& candidate : selector.select()) {
+            next_nodes.push_back(tree.add_leaf(candidate));
+        }
+        if (next_nodes.empty()) {
+            // 新しいノードがないとき
+            cerr << "ERROR: Failed to find any valid solution" << endl;
+            return {};
+        }
+        // 不要なノードを削除する
+        for (int v : curr_nodes) {
+            tree.remove_if_leaf(v);
+        }
+        // ダブルバッファリングで配列を使い回す
+        swap(curr_nodes, next_nodes);
+        next_nodes.clear();
+
+        selector.clear();
     }
-    cerr << "ERROR: unreachable statement" << endl;
-    std::exit(-1);
+    // ターン数固定型の問題で全ターンが終了したとき
+    int best_leaf = tree.get_best_leaf(curr_nodes);
+    return tree.get_path(best_leaf);
 }
