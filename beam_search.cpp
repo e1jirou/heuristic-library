@@ -44,7 +44,7 @@ class ObjectPool {
         stack<int> garbage_;
 };
 
-using Hash = unsigned long long;
+using Hash = unsigned long long; // TODO
 
 // 状態遷移を行うために必要な情報
 // メモリ使用量をできるだけ小さくしてください
