@@ -173,6 +173,27 @@ vector<ll> divisors(ll n) {
     return ret;
 }
 
+vector<pair<ll,int>> prime_factorization(ll n) {
+    vector<pair<ll,int>> ret;
+    ll p = 2;
+    while (p * p <= n) {
+        if (n % p == 0) {
+            int cnt = 1;
+            n /= p;
+            while (n % p == 0) {
+                ++cnt;
+                n /= p;
+            }
+            ret.push_back({p, cnt});
+        }
+        ++p;
+    }
+    if (n >= 2) {
+        ret.push_back({n, 1});
+    }
+    return ret;
+}
+
 vector<vector<mint>> dot(const vector<vector<mint>>& a, const vector<vector<mint>>& b) {
     assert(a[0].size() == b.size());
     vector<vector<mint>> ret(a.size(), vector<mint>(b[0].size()));
