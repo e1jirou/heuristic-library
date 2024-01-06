@@ -430,7 +430,7 @@ class LowestCommonAncestor {
 int main() {
     ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
-    cout << fixed << setprecision(10);
+    cout << fixed << setprecision(20);
 
     // TODO
 
