@@ -194,6 +194,55 @@ vector<pair<ll,int>> prime_factorization(ll n) {
     return ret;
 }
 
+ll floor_sqrt(ll n) {
+    // binary search
+    ll left = 0;
+    ll right = n;
+    while (left < right) {
+        ll center = (left + right + 1) / 2;
+        if (center * center <= n) {
+            left = center;
+        } else {
+            right = center - 1;
+        }
+    }
+    return left;
+}
+
+// Discrete Logarithm Problem
+// mod must be a prime number
+// it returns min({i | a^i ≡ b}) or -1
+ll dlp_solver(ll a, ll b, ll mod) {
+    // baby-step giant-step
+    a %= mod;
+    b %= mod;
+    ll sqrt_mod = floor_sqrt(mod) + 1;
+
+    unordered_map<ll,ll> babies;
+    babies.reserve(sqrt_mod);
+    ll pow_a = 1;
+    for (int i = 0; i < sqrt_mod; ++i) {
+        if (babies.contains(pow_a)) {
+            break;
+        }
+        babies[pow_a] = i;
+        pow_a = pow_a * a % mod;
+    }
+    // 1 / pow(a, sqrt_mod)
+    ll r = inv_mod(pow_mod(a, sqrt_mod, mod), mod);
+    for (int i = 0; i < sqrt_mod; ++i) {
+        if (babies.contains(b)) {
+            return sqrt_mod * i + babies[b];
+        }
+        b = b * r % mod;
+    }
+    return -1;
+}
+
+inline ll natural_rem(ll x, ll mod) {
+    return (x % mod + mod) % mod;
+}
+
 vector<vector<mint>> dot(const vector<vector<mint>>& a, const vector<vector<mint>>& b) {
     assert(a[0].size() == b.size());
     vector<vector<mint>> ret(a.size(), vector<mint>(b[0].size()));
